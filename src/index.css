@@ -1,0 +1,268 @@
+/* 字体导入 - 必须在最前面 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 全局基础样式 */
+@layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 transition-colors duration-200;
+  }
+
+  /* 暗色模式 */
+  .dark {
+    body {
+      @apply bg-gray-900 text-gray-100;
+    }
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500;
+  }
+
+  /* 选择文本样式 */
+  ::selection {
+    @apply bg-primary-100 text-primary-900 dark:bg-primary-800 dark:text-primary-100;
+  }
+
+  /* Focus ring样式 */
+  *:focus {
+    @apply outline-none;
+  }
+
+  *:focus-visible {
+    @apply ring-2 ring-primary-500 ring-offset-2 ring-offset-white dark:ring-offset-gray-900;
+  }
+}
+
+/* 组件层样式 */
+@layer components {
+  /* 按钮基础样式 */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus-visible:ring-primary-500 active:bg-primary-800;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-900 hover:bg-gray-200 focus-visible:ring-gray-500 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-gray-500 dark:text-gray-300 dark:hover:bg-gray-800;
+  }
+
+  .btn-danger {
+    @apply btn bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500 active:bg-error-800;
+  }
+
+  /* 输入框样式 */
+  .input {
+    @apply block w-full px-3 py-2 text-sm border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-50 disabled:text-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400 dark:focus:ring-primary-400 dark:focus:border-primary-400;
+  }
+
+  /* 卡片样式 */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-soft dark:bg-gray-800 dark:border-gray-700;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700;
+  }
+
+  /* 拖拽区域样式 */
+  .dropzone {
+    @apply border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-all duration-200 hover:border-primary-400 hover:bg-primary-50 dark:border-gray-600 dark:hover:border-primary-500 dark:hover:bg-primary-900/20;
+  }
+
+  .dropzone-active {
+    @apply border-primary-500 bg-primary-50 dark:border-primary-400 dark:bg-primary-900/30;
+  }
+
+  /* 文件树样式 */
+  .file-tree {
+    @apply space-y-1;
+  }
+
+  .file-tree-item {
+    @apply flex items-center px-2 py-1.5 text-sm rounded-lg hover:bg-gray-100 cursor-pointer transition-colors duration-150 dark:hover:bg-gray-700;
+  }
+
+  .file-tree-item-selected {
+    @apply bg-primary-100 text-primary-900 dark:bg-primary-900/30 dark:text-primary-100;
+  }
+
+  /* 加载动画 */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-2 border-gray-300 border-t-primary-600;
+  }
+
+  /* 进度条 */
+  .progress-bar {
+    @apply w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700;
+  }
+
+  .progress-bar-fill {
+    @apply bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out;
+  }
+}
+
+/* 工具类 */
+@layer utilities {
+  /* 玻璃态效果 */
+  .glass {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20 dark:bg-gray-800/80 dark:border-gray-700/20;
+  }
+
+  /* 渐变文字 */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-primary-800 bg-clip-text text-transparent;
+  }
+
+  /* 阴影效果 */
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+  }
+
+  /* 隐藏滚动条但保持滚动功能 */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 文本截断 */
+  .truncate-2-lines {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .truncate-3-lines {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* 响应式断点自定义 */
+@media (max-width: 640px) {
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+}
+
+/* 动画关键帧 */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 可访问性增强 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .card {
+    @apply border-2 border-gray-900 dark:border-white;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-700 border-2 border-blue-900;
+  }
+}

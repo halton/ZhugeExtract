@@ -1,0 +1,404 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # 单元测试和集成测试
+  unit-integration-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate test files
+        run: npm run generate:test-files
+        
+      - name: Run linting
+        run: npm run lint
+        
+      - name: Run type checking
+        run: npm run type-check
+        
+      - name: Run unit tests
+        run: npm run test:unit -- --coverage --reporter=verbose
+        
+      - name: Run integration tests
+        run: npm run test:integration -- --coverage
+        
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: unit-test-results-node-${{ matrix.node-version }}
+          path: |
+            test-results/
+            coverage/
+            
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-node-${{ matrix.node-version }}
+          fail_ci_if_error: false
+
+  # E2E测试
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Generate test fixtures
+        run: npm run generate:test-files
+        
+      - name: Run E2E tests
+        run: npx playwright test --project="${{ matrix.browser }}"
+        env:
+          CI: true
+          
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-results-${{ matrix.browser }}
+          path: |
+            test-results/
+            playwright-report/
+            
+      - name: Upload E2E artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: e2e-artifacts-${{ matrix.browser }}
+          path: test-results/e2e-artifacts/
+
+  # 移动端E2E测试
+  mobile-e2e-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        device: ['Mobile Chrome', 'Mobile Safari']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Run mobile E2E tests
+        run: npx playwright test --project="${{ matrix.device }}"
+        env:
+          CI: true
+          
+      - name: Upload mobile test results
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: mobile-e2e-results-${{ matrix.device }}
+          path: |
+            test-results/
+            playwright-report/
+
+  # 性能测试
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.12.x
+        
+      - name: Run Lighthouse CI
+        run: lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          
+      - name: Run performance benchmarks
+        run: npm run test:benchmark
+        
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: |
+            .lighthouseci/
+            benchmark-results/
+
+  # 安全测试
+  security-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: javascript
+          
+      - name: Run dependency vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-results.json'
+          
+      - name: Upload security results
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-results
+          path: trivy-results.json
+
+  # 代码质量检查
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # SonarCloud needs full history
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
+      - name: Run ESLint with SARIF output
+        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+        continue-on-error: true
+        
+      - name: Upload ESLint results to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
+
+  # 兼容性测试
+  compatibility-tests:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run compatibility tests
+        run: npm run test:compatibility
+        
+      - name: Build on ${{ matrix.os }}
+        run: npm run build
+        
+      - name: Upload compatibility results
+        uses: actions/upload-artifact@v3
+        with:
+          name: compatibility-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: test-results/
+
+  # 测试结果汇总
+  test-summary:
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests, e2e-tests, mobile-e2e-tests, performance-tests, security-tests, code-quality, compatibility-tests]
+    if: always()
+    
+    steps:
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v3
+        
+      - name: Generate test summary
+        run: |
+          echo "# Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 单元测试结果
+          if [ -f unit-test-results-*/test-results/results.json ]; then
+            echo "## Unit Tests" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Unit tests completed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # E2E测试结果
+          if [ -d e2e-results-* ]; then
+            echo "## E2E Tests" >> $GITHUB_STEP_SUMMARY
+            echo "✅ E2E tests completed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 性能测试结果
+          if [ -d performance-results ]; then
+            echo "## Performance Tests" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Performance tests completed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # 安全测试结果
+          if [ -f security-results/trivy-results.json ]; then
+            echo "## Security Tests" >> $GITHUB_STEP_SUMMARY
+            echo "✅ Security tests completed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🧪 Test Results\n\n';
+            
+            // 添加测试结果链接
+            comment += '- [View detailed test results](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n';
+            comment += '- [View coverage report](https://codecov.io/gh/${{ github.repository }})\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+# 定时任务 - 夜间完整测试
+  nightly-tests:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Generate large test files
+        run: npm run generate:large-test-files
+        
+      - name: Run stress tests
+        run: npm run test:stress
+        
+      - name: Run memory leak tests
+        run: npm run test:memory-leaks
+        
+      - name: Run extended E2E tests
+        run: npm run test:e2e:extended
+        
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          channel: '#dev-alerts'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+# 触发条件配置
+on:
+  schedule:
+    - cron: '0 2 * * *' # 每天凌晨2点运行夜间测试

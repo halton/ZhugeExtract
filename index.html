@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="ZhugeExtract - 在线压缩文件解压和预览工具，支持ZIP、RAR、7Z等格式，完全本地处理，保护您的隐私" />
+    <meta name="keywords" content="在线解压,ZIP解压,RAR解压,7Z解压,文件预览,隐私保护,无需上传" />
+    <meta name="author" content="ZhugeExtract Team" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://zhuge-extract.com/" />
+    <meta property="og:title" content="ZhugeExtract - 智慧解压，隐私无忧" />
+    <meta property="og:description" content="基于诸葛亮智慧的在线解压工具，支持多种格式，完全本地处理，保护隐私" />
+    <meta property="og:image" content="/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://zhuge-extract.com/" />
+    <meta property="twitter:title" content="ZhugeExtract - 智慧解压，隐私无忧" />
+    <meta property="twitter:description" content="基于诸葛亮智慧的在线解压工具，支持多种格式，完全本地处理，保护隐私" />
+    <meta property="twitter:image" content="/twitter-image.png" />
+
+    <!-- PWA配置 -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ZhugeExtract" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/JetBrainsMono-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    
+    <!-- SharedArrayBuffer支持 (WebAssembly需要) -->
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
+    
+    <title>ZhugeExtract - 智慧解压，隐私无忧</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- 无JavaScript时的降级提示 -->
+    <noscript>
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.9);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        font-family: sans-serif;
+        text-align: center;
+        padding: 20px;
+      ">
+        <div>
+          <h1>需要启用JavaScript</h1>
+          <p>ZhugeExtract需要JavaScript才能正常运行。请在浏览器设置中启用JavaScript，然后刷新页面。</p>
+        </div>
+      </div>
+    </noscript>
+  </body>
+</html>
