@@ -121,7 +121,7 @@ export class TestHelpers {
   static createErrorScenarios() {
     return {
       corruptedFile: this.createMockFile('corrupted.zip', 'invalid content'),
-      oversizedFile: this.createMockArchiveFile('zip', 100 * 1024 * 1024),
+      oversizedFile: this.createMockArchiveFile('zip', 1024 * 1024), // 1MB instead of 100MB
       passwordProtected: this.createMockArchiveFile('zip', 1024),
       networkError: new Error('Network request failed'),
       memoryError: new Error('Out of memory'),

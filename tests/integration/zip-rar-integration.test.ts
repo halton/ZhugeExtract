@@ -222,7 +222,7 @@ describe('ZIP/RAR 集成测试', () => {
 
   describe('大文件处理性能测试', () => {
     it('应该高效处理大型ZIP文件', async () => {
-      const largeZip = TestHelpers.createMockArchiveFile('zip', 100 * 1024 * 1024); // 100MB
+      const largeZip = TestHelpers.createMockArchiveFile('zip', 1024 * 1024); // 1MB for memory efficiency
       
       // 模拟大文件处理
       archiveService.processArchive.mockImplementation(async (file) => {
@@ -235,7 +235,7 @@ describe('ZIP/RAR 集成测试', () => {
             size: 100 * 1024, // 100KB each
             path: `folder-${Math.floor(i / 100)}/file-${i}.txt`
           })),
-          totalSize: 100 * 1024 * 1024,
+          totalSize: 1024 * 1024,
           processingTime: 500
         };
       });

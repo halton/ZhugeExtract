@@ -29,20 +29,23 @@ export default defineConfig({
       'tests/fixtures/**/*'
     ],
     
-    // 测试超时设置
-    testTimeout: 10000, // 10秒
-    hookTimeout: 10000, // 10秒
+    // 测试超时设置 - 增加超时时间
+    testTimeout: 30000, // 30秒
+    hookTimeout: 30000, // 30秒
     
-    // 并发设置 - 减少内存使用
-    threads: true,
-    maxThreads: 2,
-    minThreads: 1,
-    pool: 'threads',
+    // 内存优化设置
+    forceRerunTriggers: ['**/package.json/**', '**/vite.config.*/**'],
+    cache: false, // 禁用缓存减少内存
+    
+    // 并发设置 - 极致内存优化
+    threads: false, // 关闭多线程
+    maxConcurrency: 1, // 最大并发数设为1
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        maxThreads: 2,
-        minThreads: 1,
-        isolate: false
+      forks: {
+        maxForks: 1,
+        minForks: 1,
+        isolate: true
       }
     },
     

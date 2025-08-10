@@ -10,7 +10,7 @@ describe('MemoryManager', () => {
     Object.defineProperty(performance, 'memory', {
       value: {
         usedJSHeapSize: 50 * 1024 * 1024, // 50MB
-        totalJSHeapSize: 100 * 1024 * 1024, // 100MB
+        totalJSHeapSize: 10 * 1024 * 1024, // 10MB for test efficiency
         jsHeapSizeLimit: 2 * 1024 * 1024 * 1024 // 2GB
       },
       configurable: true

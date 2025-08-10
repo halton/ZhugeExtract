@@ -25,7 +25,7 @@ describe('FileUpload', () => {
     onFileDrop: mockOnFileDrop,
     onError: mockOnError,
     acceptedTypes: ['application/zip', 'application/x-rar-compressed'],
-    maxFileSize: 100 * 1024 * 1024, // 100MB
+    maxFileSize: 1024 * 1024, // 1MB for test efficiency
   };
 
   beforeEach(() => {

@@ -24,18 +24,33 @@ export class TestFileGenerator {
     return filePath;
   }
 
-  // 生成二进制文件
+  // 生成二进制文件 - 内存优化版本
   static generateBinaryFile(fileName: string, size: number): string {
     this.ensureOutputDir();
     const filePath = path.join(this.OUTPUT_DIR, fileName);
-    const buffer = Buffer.alloc(size);
     
-    // 填充随机数据
-    for (let i = 0; i < size; i++) {
-      buffer[i] = Math.floor(Math.random() * 256);
+    // 使用流式写入，避免创建大Buffer
+    const fd = fs.openSync(filePath, 'w');
+    const chunkSize = Math.min(8192, size); // 8KB chunks
+    const chunk = Buffer.alloc(chunkSize);
+    
+    try {
+      let written = 0;
+      while (written < size) {
+        const currentChunkSize = Math.min(chunkSize, size - written);
+        
+        // 只填充实际需要的字节数
+        for (let i = 0; i < currentChunkSize; i++) {
+          chunk[i] = Math.floor(Math.random() * 256);
+        }
+        
+        fs.writeSync(fd, chunk, 0, currentChunkSize);
+        written += currentChunkSize;
+      }
+    } finally {
+      fs.closeSync(fd);
     }
     
-    fs.writeFileSync(filePath, buffer);
     return filePath;
   }
 
