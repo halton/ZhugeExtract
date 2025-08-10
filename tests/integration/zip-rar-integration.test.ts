@@ -222,7 +222,7 @@ describe('ZIP/RAR 集成测试', () => {
 
   describe('大文件处理性能测试', () => {
     it('应该高效处理大型ZIP文件', async () => {
-      const largeZip = TestHelpers.createMockArchiveFile('zip', 1024 * 1024); // 1MB for memory efficiency
+      const largeZip = TestHelpers.createMockArchiveFile('zip', 10 * 1024); // 10KB for memory efficiency
       
       // 模拟大文件处理
       archiveService.processArchive.mockImplementation(async (file) => {
@@ -253,7 +253,7 @@ describe('ZIP/RAR 集成测试', () => {
     });
 
     it('应该高效处理RAR固实压缩', async () => {
-      const solidRar = TestHelpers.createMockArchiveFile('rar', 200 * 1024 * 1024); // 200MB
+      const solidRar = TestHelpers.createMockArchiveFile('rar', 20 * 1024); // 20KB
       
       archiveService.processArchive.mockImplementation(async (file) => {
         // 固实压缩需要按顺序处理，模拟较长处理时间
@@ -364,9 +364,9 @@ describe('ZIP/RAR 集成测试', () => {
   describe('多格式同时处理', () => {
     it('应该能同时处理多个不同格式的文件', async () => {
       const files = [
-        TestHelpers.createMockArchiveFile('zip', 1024 * 1024),
-        TestHelpers.createMockArchiveFile('rar', 2 * 1024 * 1024),
-        TestHelpers.createMockArchiveFile('zip', 512 * 1024)
+        TestHelpers.createMockArchiveFile('zip', 1024),
+        TestHelpers.createMockArchiveFile('rar', 2 * 1024),
+        TestHelpers.createMockArchiveFile('zip', 512)
       ];
 
       const processResults = [];
@@ -399,7 +399,7 @@ describe('ZIP/RAR 集成测试', () => {
 
     it('应该支持批量文件的并行处理', async () => {
       const batchFiles = Array.from({ length: 5 }, (_, i) => 
-        TestHelpers.createMockArchiveFile(i % 2 === 0 ? 'zip' : 'rar', 1024 * 1024)
+        TestHelpers.createMockArchiveFile(i % 2 === 0 ? 'zip' : 'rar', 1024)
       );
 
       archiveService.processArchive.mockImplementation(async (file, options) => {
@@ -436,7 +436,7 @@ describe('ZIP/RAR 集成测试', () => {
   describe('内存管理和清理', () => {
     it('应该在处理完成后正确清理内存', async () => {
       const largeFiles = Array.from({ length: 3 }, (_, i) => 
-        TestHelpers.createMockArchiveFile('zip', 50 * 1024 * 1024) // 50MB each
+        TestHelpers.createMockArchiveFile('zip', 50 * 1024) // 50KB each
       );
 
       const initialMemory = performance.memory?.usedJSHeapSize || 0;
@@ -444,7 +444,7 @@ describe('ZIP/RAR 集成测试', () => {
       for (const file of largeFiles) {
         archiveService.processArchive.mockImplementation(async () => {
           // 模拟内存使用
-          const tempBuffer = new ArrayBuffer(20 * 1024 * 1024); // 临时使用20MB
+          const tempBuffer = new ArrayBuffer(20 * 1024); // 临时使用20KB
           
           return {
             structure: [{ name: 'test.txt', size: 1024 }],
@@ -469,7 +469,7 @@ describe('ZIP/RAR 集成测试', () => {
       const memoryIncrease = finalMemory - initialMemory;
       
       // 内存增长应该很小，说明清理有效
-      expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024); // 小于10MB
+      expect(memoryIncrease).toBeLessThan(10 * 1024); // 小于10KB
     });
   });
 });

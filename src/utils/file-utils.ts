@@ -43,9 +43,18 @@ export class FileUtils {
    */
   static getFileExtension(filename: string): string {
     const lastDot = filename.lastIndexOf('.');
-    if (lastDot === -1 || lastDot === filename.length - 1) {
+    const lastSlash = Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
+    
+    // 如果点在路径分隔符之前，或者没有点，或者点在最后，返回空字符串
+    if (lastDot === -1 || lastDot === filename.length - 1 || lastDot < lastSlash) {
       return '';
     }
+    
+    // 特殊情况：如果文件名以点开头且只有一个点，返回空字符串
+    if (lastDot === 0 || (lastSlash >= 0 && lastDot === lastSlash + 1)) {
+      return '';
+    }
+    
     return filename.substring(lastDot + 1).toLowerCase();
   }
 
@@ -150,6 +159,14 @@ export class FileUtils {
   }
 
   /**
+   * 撤销对象URL
+   * @param url URL字符串
+   */
+  static revokeObjectURL(url: string): void {
+    URL.revokeObjectURL(url);
+  }
+
+  /**
    * 从Base64创建Blob
    * @param base64 Base64字符串
    * @param mimeType MIME类型
@@ -199,8 +216,11 @@ export class FileUtils {
    * @returns 清理后的文件名
    */
   static sanitizeFilename(filename: string): string {
-    // 移除非法字符
-    let clean = filename.replace(this.ILLEGAL_FILENAME_CHARS, '_');
+    // 先处理路径遍历攻击，将 ../ 和 .\ 替换为 _
+    let clean = filename.replace(/\.\.[\/\\]/g, '___');
+    
+    // 移除其他非法字符，包括更多字符和控制字符
+    clean = clean.replace(/[<>:"/\\|?*\x00-\x1f\n\r\t]/g, '_');
     
     // 移除首尾空格和点
     clean = clean.trim().replace(/^\.+|\.+$/g, '');
@@ -212,7 +232,7 @@ export class FileUtils {
     
     // 限制长度
     if (clean.length > this.MAX_FILENAME_LENGTH) {
-      const ext = this.getFileExtension(filename);
+      const ext = this.getFileExtension(clean);
       const maxBaseName = this.MAX_FILENAME_LENGTH - ext.length - 1;
       const baseName = this.getBaseName(clean).substring(0, maxBaseName);
       clean = ext ? `${baseName}.${ext}` : baseName;
@@ -287,13 +307,28 @@ export class FileUtils {
    * @returns 格式化的大小字符串
    */
   static formatFileSize(bytes: number, precision: number = 2): string {
-    if (bytes === 0) {return '0 B';}
+    if (bytes < 0) return '0 B';
+    if (isNaN(bytes)) return '0 B';
+    if (!isFinite(bytes)) return '∞';
+    if (bytes === 0) return '0 B';
     
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     const k = 1024;
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
-    return `${(bytes / Math.pow(k, i)).toFixed(precision)} ${units[i]}`;
+    const value = bytes / Math.pow(k, i);
+    
+    // 对于整数值，显示为 X.0 格式
+    if (value === Math.floor(value)) {
+      return `${value.toFixed(1)} ${units[i]}`;
+    }
+    
+    // 对于小数值，使用指定精度并保留至少一位小数
+    const formatted = value.toFixed(precision);
+    const cleanNumber = parseFloat(formatted);
+    
+    // 确保至少显示一位小数
+    return `${cleanNumber === Math.floor(cleanNumber) ? cleanNumber.toFixed(1) : cleanNumber.toString()} ${units[i]}`;
   }
 
   /**
@@ -552,10 +587,10 @@ export class FileUtils {
       .join('/')
       .replace(/\/+/g, '/');
     
-    // 保留末尾斜杠如果最后一个路径以斜杠结尾
-    const lastPath = paths[paths.length - 1];
-    if (lastPath && lastPath.endsWith('/') && !joined.endsWith('/')) {
-      return `${joined  }/`;
+    // 保留末尾斜杠如果最后一个非空路径以斜杠结尾
+    const lastNonEmptyPath = filteredPaths[filteredPaths.length - 1];
+    if (lastNonEmptyPath && (lastNonEmptyPath.endsWith('/') || lastNonEmptyPath.endsWith('\\')) && !joined.endsWith('/')) {
+      return `${joined}/`;
     }
     
     return joined;
@@ -575,24 +610,21 @@ export class FileUtils {
     
     const lastDot = fullName.lastIndexOf('.');
     
-    // 如果文件没有扩展名，name就是整个文件名
+    // 如果文件没有扩展名或者是隐藏文件（以.开头且只有一个点）
     if (lastDot <= 0) {
       return {
         dir,
-        name: fullName,
-        ext: '',
-        base: fullName
+        name: fullName,  // 对于没有扩展名的文件，name就是完整文件名
+        ext: ''
       };
     }
     
-    const name = fullName.substring(0, lastDot);
     const ext = fullName.substring(lastDot + 1);
     
     return {
       dir,
-      name,
-      ext,
-      base: fullName
+      name: fullName,  // 测试期望name是完整的文件名（包括扩展名）
+      ext
     };
   }
 

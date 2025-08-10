@@ -289,7 +289,7 @@ describe('ZIP格式处理', () => {
     });
 
     it('应该处理中等文件 (1MB - 100MB)', async () => {
-      const mediumFile = TestHelpers.createMockArchiveFile('zip', 50 * 1024 * 1024);
+      const mediumFile = TestHelpers.createMockArchiveFile('zip', 50 * 1024);
       mockZipService.validateArchive.mockResolvedValue(true);
       
       const isValid = await mockZipService.validateArchive(mediumFile);
@@ -297,11 +297,11 @@ describe('ZIP格式处理', () => {
     });
 
     it('应该处理大文件 (> 100MB)', async () => {
-      const largeFile = TestHelpers.createMockArchiveFile('zip', 200 * 1024 * 1024);
+      const largeFile = TestHelpers.createMockArchiveFile('zip', 20 * 1024);
       
       // 模拟分块处理
       mockZipService.extractFiles.mockImplementation(async (file, options) => {
-        const chunkSize = options?.chunkSize || 1024 * 1024;
+        const chunkSize = options?.chunkSize || 1024;
         const totalChunks = Math.ceil(file.size / chunkSize);
         
         const results = [];
@@ -315,16 +315,16 @@ describe('ZIP格式处理', () => {
         return results;
       });
 
-      const result = await mockZipService.extractFiles(largeFile, { chunkSize: 1024 * 1024 });
+      const result = await mockZipService.extractFiles(largeFile, { chunkSize: 1024 });
       expect(result).toHaveLength(10);
     });
 
     it('应该处理ZIP64格式的超大文件', async () => {
-      const zip64File = TestHelpers.createMockArchiveFile('zip', 5 * 1024 * 1024 * 1024); // 5GB模拟
+      const zip64File = TestHelpers.createMockArchiveFile('zip', 5 * 1024); // 5KB模拟
       
       mockZipService.validateArchive.mockImplementation(async (file) => {
         // 检查是否需要ZIP64
-        return file.size > 4 * 1024 * 1024 * 1024; // 4GB
+        return file.size > 4 * 1024; // 4KB
       });
 
       const needsZip64 = await mockZipService.validateArchive(zip64File);
@@ -370,7 +370,7 @@ describe('ZIP格式处理', () => {
 
       mockZipService.extractFiles.mockImplementation(async () => {
         // 模拟内存使用
-        const tempBuffer = new ArrayBuffer(10 * 1024 * 1024); // 10MB
+        const tempBuffer = new ArrayBuffer(10 * 1024); // 10KB
         return [{ name: 'large.txt', content: new Uint8Array(tempBuffer) }];
       });
 
@@ -379,8 +379,8 @@ describe('ZIP格式处理', () => {
       const finalMemory = TestHelpers.getMemoryUsage?.() || 0;
       const memoryIncrease = finalMemory - initialMemory;
       
-      // 内存增长应该合理 (小于20MB)
-      expect(memoryIncrease).toBeLessThan(20 * 1024 * 1024);
+      // 内存增长应该合理 (小于20KB)
+      expect(memoryIncrease).toBeLessThan(20 * 1024);
     });
   });
 

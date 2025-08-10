@@ -80,10 +80,18 @@ describe('ArchiveService', () => {
     });
 
     it('应该验证文件大小限制', async () => {
-      const largeContent = new Array(3 * 1024 * 1024 * 1024).fill('a').join(''); // 3GB
-      const largeFile = new File([largeContent], 'large.zip');
+      // 模拟大文件而不实际创建大内存分配
+      const mockLargeFile = {
+        name: 'large.zip',
+        size: 3 * 1024 * 1024 * 1024, // 3GB (只是数字)
+        type: 'application/zip',
+        slice: vi.fn(),
+        stream: vi.fn(),
+        text: vi.fn(),
+        arrayBuffer: vi.fn()
+      } as any;
 
-      await expect(archiveService.loadArchive(largeFile))
+      await expect(archiveService.loadArchive(mockLargeFile))
         .rejects.toThrow('File too large');
     });
 

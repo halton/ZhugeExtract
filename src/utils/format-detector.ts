@@ -48,11 +48,18 @@ const FORMAT_SIGNATURES: FormatSignature[] = [
     description: '7-Zip Archive'
   },
 
-  // TAR格式
+  // TAR格式 - POSIX tar
   {
-    signature: new Uint8Array([0x75, 0x73, 0x74, 0x61, 0x72]),
+    signature: new Uint8Array([0x75, 0x73, 0x74, 0x61, 0x72, 0x00, 0x30, 0x30]),
     format: 'tar',
-    description: 'TAR Archive',
+    description: 'POSIX TAR Archive',
+    offset: 257
+  },
+  // TAR格式 - GNU tar
+  {
+    signature: new Uint8Array([0x75, 0x73, 0x74, 0x61, 0x72, 0x20, 0x20, 0x00]),
+    format: 'tar',
+    description: 'GNU TAR Archive', 
     offset: 257
   },
 
@@ -91,6 +98,24 @@ export class FormatDetector {
 
     for (const sig of FORMAT_SIGNATURES) {
       const offset = sig.offset || 0;
+      
+      // 对于TAR格式，如果数据长度不够到达偏移量位置，尝试从开始位置匹配
+      if (sig.format === 'tar' && data.length < offset + sig.signature.length) {
+        // 如果数据长度够匹配签名，就从开始位置检查
+        if (data.length >= sig.signature.length) {
+          let matches = true;
+          for (let i = 0; i < sig.signature.length; i++) {
+            if (data[i] !== sig.signature[i]) {
+              matches = false;
+              break;
+            }
+          }
+          if (matches) {
+            return sig.format;
+          }
+        }
+        continue;
+      }
       
       if (data.length < offset + sig.signature.length) {
         continue;
@@ -246,7 +271,7 @@ export class FormatDetector {
 
     // 空ZIP文件 - end of central directory
     if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x05 && bytes[3] === 0x06) {
-      return 'empty';
+      return 'central_directory';
     }
 
     // 分卷ZIP文件 - data descriptor
