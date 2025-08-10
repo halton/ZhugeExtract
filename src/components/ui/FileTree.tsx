@@ -49,7 +49,7 @@ export function FileTree({ files, onFileSelect, selectedFile, className = '' }: 
       // 创建目录结构
       for (let i = 0; i < parts.length - 1; i++) {
         const part = parts[i]
-        const currentPath = '/' + parts.slice(0, i + 1).join('/')
+        const currentPath = `/${  parts.slice(0, i + 1).join('/')}`
 
         if (!current.children[part]) {
           current.children[part] = {
@@ -211,11 +211,11 @@ export function FileTree({ files, onFileSelect, selectedFile, className = '' }: 
 
 // 工具函数：格式化文件大小
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B'
+  if (bytes === 0) {return '0 B'}
   
   const k = 1024
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))  } ${  sizes[i]}`
 }

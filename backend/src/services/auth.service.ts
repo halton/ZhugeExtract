@@ -190,7 +190,7 @@ export class AuthService {
       }
 
     } catch (error) {
-      throw new Error('令牌刷新失败: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      throw new Error(`令牌刷新失败: ${  error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -233,7 +233,7 @@ export class AuthService {
       return payload
 
     } catch (error) {
-      throw new Error('令牌验证失败: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      throw new Error(`令牌验证失败: ${  error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

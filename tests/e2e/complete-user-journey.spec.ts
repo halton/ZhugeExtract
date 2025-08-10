@@ -215,7 +215,7 @@ test.describe('ZhugeExtract - 完整用户旅程', () => {
     await expect(page.getByTestId('progress-text')).toBeVisible();
     
     // 监控进度更新
-    let progressValues: string[] = [];
+    const progressValues: string[] = [];
     page.on('console', msg => {
       if (msg.text().includes('Progress:')) {
         progressValues.push(msg.text());

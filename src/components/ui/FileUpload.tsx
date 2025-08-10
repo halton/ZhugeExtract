@@ -25,7 +25,7 @@ export function FileUpload({
     }
 
     const allowedExtensions = accept.split(',').map(ext => ext.trim().toLowerCase())
-    const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase()
+    const fileExtension = `.${  file.name.split('.').pop()?.toLowerCase()}`
     
     if (!allowedExtensions.includes(fileExtension)) {
       return '不支持的文件格式'
@@ -35,7 +35,7 @@ export function FileUpload({
   }, [accept, maxSize])
 
   const handleFileSelect = useCallback((files: FileList | null) => {
-    if (!files || files.length === 0) return
+    if (!files || files.length === 0) {return}
 
     const file = files[0]
     const validationError = validateFile(file)

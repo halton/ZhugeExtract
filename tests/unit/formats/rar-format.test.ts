@@ -570,15 +570,15 @@ describe('RAR格式处理', () => {
 
 // 辅助函数
 function detectRarFormat(signature: Uint8Array): string {
-  if (signature.length < 7) return 'unknown';
+  if (signature.length < 7) {return 'unknown';}
   
   // 检查RAR签名 "Rar!"
   if (signature[0] === 0x52 && signature[1] === 0x61 && 
       signature[2] === 0x72 && signature[3] === 0x21) {
     
     // 检查版本标识
-    if (signature[6] === 0x00) return 'rar4';
-    if (signature[6] === 0x01 && signature[7] === 0x00) return 'rar5';
+    if (signature[6] === 0x00) {return 'rar4';}
+    if (signature[6] === 0x01 && signature[7] === 0x00) {return 'rar5';}
   }
   
   return 'unknown';

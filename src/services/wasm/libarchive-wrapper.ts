@@ -279,7 +279,7 @@ function convertLibArchiveFile(file: any): ArchiveFile {
  */
 function calculateCompressionRatio(files: any[], archiveSize: number): number {
   const totalUncompressedSize = files.reduce((sum, file) => sum + (file.size || 0), 0)
-  if (totalUncompressedSize === 0) return 0
+  if (totalUncompressedSize === 0) {return 0}
   return (archiveSize / totalUncompressedSize)
 }
 

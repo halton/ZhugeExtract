@@ -39,9 +39,9 @@ beforeAll(() => {
         this.type = options.type || '';
         this.lastModified = options.lastModified || Date.now();
         this.size = bits.reduce((size, bit) => {
-          if (typeof bit === 'string') return size + bit.length;
-          if (bit instanceof ArrayBuffer) return size + bit.byteLength;
-          if (ArrayBuffer.isView(bit)) return size + bit.byteLength;
+          if (typeof bit === 'string') {return size + bit.length;}
+          if (bit instanceof ArrayBuffer) {return size + bit.byteLength;}
+          if (ArrayBuffer.isView(bit)) {return size + bit.byteLength;}
           return size;
         }, 0);
       }
@@ -73,9 +73,9 @@ beforeAll(() => {
       constructor(parts: any[] = [], options: any = {}) {
         this.type = options.type || '';
         this.size = parts.reduce((size, part) => {
-          if (typeof part === 'string') return size + part.length;
-          if (part instanceof ArrayBuffer) return size + part.byteLength;
-          if (ArrayBuffer.isView(part)) return size + part.byteLength;
+          if (typeof part === 'string') {return size + part.length;}
+          if (part instanceof ArrayBuffer) {return size + part.byteLength;}
+          if (ArrayBuffer.isView(part)) {return size + part.byteLength;}
           return size;
         }, 0);
       }
@@ -189,7 +189,7 @@ beforeAll(() => {
         }
         return arr;
       },
-      randomUUID: () => 'mock-uuid-' + Math.random().toString(36).substr(2, 9)
+      randomUUID: () => `mock-uuid-${  Math.random().toString(36).substr(2, 9)}`
     };
   }
 

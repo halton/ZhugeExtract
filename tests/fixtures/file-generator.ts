@@ -171,7 +171,7 @@ export class TestFileGenerator {
     }
     
     // 写入校验和
-    const checksumStr = checksum.toString(8).padStart(6, '0') + '\0 ';
+    const checksumStr = `${checksum.toString(8).padStart(6, '0')  }\0 `;
     tarHeader.write(checksumStr, 148, 8);
     
     fs.writeFileSync(filePath, tarHeader);

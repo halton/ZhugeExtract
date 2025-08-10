@@ -199,7 +199,7 @@ export class MemoryManager {
    * 开始内存监控
    */
   private startMonitoring(): void {
-    if (this.intervalId) return;
+    if (this.intervalId) {return;}
 
     this.intervalId = setInterval(() => {
       this.checkMemoryUsage();

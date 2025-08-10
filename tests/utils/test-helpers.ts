@@ -203,7 +203,7 @@ export class TestDataGenerator {
     for (let i = 0; i < depth; i++) {
       parts.push(this.randomString(8));
     }
-    return parts.join('/') + '.txt';
+    return `${parts.join('/')  }.txt`;
   }
 
   // 生成测试用户数据

@@ -492,16 +492,16 @@ describe('ZIP格式处理', () => {
 
 // 辅助函数
 function detectZipFormat(signature: Uint8Array): string {
-  if (signature.length < 4) return 'unknown';
+  if (signature.length < 4) {return 'unknown';}
   
   const first4 = Array.from(signature.slice(0, 4));
   
   // 标准ZIP签名
   if (first4[0] === 0x50 && first4[1] === 0x4b) {
-    if (first4[2] === 0x03 && first4[3] === 0x04) return 'zip'; // 本地文件头
-    if (first4[2] === 0x05 && first4[3] === 0x06) return 'zip'; // 中央目录结束
-    if (first4[2] === 0x07 && first4[3] === 0x08) return 'zip'; // 跨卷
-    if (first4[2] === 0x06 && first4[3] === 0x06) return 'zip64'; // ZIP64
+    if (first4[2] === 0x03 && first4[3] === 0x04) {return 'zip';} // 本地文件头
+    if (first4[2] === 0x05 && first4[3] === 0x06) {return 'zip';} // 中央目录结束
+    if (first4[2] === 0x07 && first4[3] === 0x08) {return 'zip';} // 跨卷
+    if (first4[2] === 0x06 && first4[3] === 0x06) {return 'zip64';} // ZIP64
   }
   
   return 'unknown';

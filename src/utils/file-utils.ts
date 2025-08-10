@@ -65,6 +65,135 @@ export class FileUtils {
   }
 
   /**
+   * 读取文件为Base64
+   * @param file 文件对象
+   * @returns Promise<string>
+   */
+  static readFileAsBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        const result = event.target?.result;
+        if (typeof result === 'string') {
+          resolve(result);
+        } else {
+          reject(new Error('Failed to read file as Base64'));
+        }
+      };
+      
+      reader.onerror = () => {
+        reject(new Error('FileReader error'));
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * 读取文件头部字节
+   * @param file 文件对象
+   * @param length 读取长度，默认16字节
+   * @returns Promise<Uint8Array>
+   */
+  static async readFileHeader(file: File, length: number = 16): Promise<Uint8Array> {
+    const slice = file.slice(0, length);
+    const buffer = await this.readFileAsArrayBuffer(slice as File);
+    return new Uint8Array(buffer);
+  }
+
+  /**
+   * 验证文件大小
+   * @param file 文件对象
+   * @param maxSize 最大大小（字节）
+   * @param minSize 最小大小（字节）
+   * @returns boolean
+   */
+  static validateFileSize(file: File, maxSize?: number, minSize?: number): boolean {
+    if (minSize !== undefined && file.size < minSize) {
+      return false;
+    }
+    if (maxSize !== undefined && file.size > maxSize) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * 验证文件类型
+   * @param file 文件对象
+   * @param allowedTypes 允许的MIME类型数组
+   * @returns boolean
+   */
+  static validateFileType(file: File, allowedTypes: string[]): boolean {
+    return allowedTypes.includes(file.type);
+  }
+
+  /**
+   * 验证文件扩展名
+   * @param filename 文件名
+   * @param allowedExtensions 允许的扩展名数组
+   * @returns boolean
+   */
+  static validateFileExtension(filename: string, allowedExtensions: string[]): boolean {
+    const ext = this.getFileExtension(filename);
+    return allowedExtensions.includes(ext);
+  }
+
+  /**
+   * 创建对象URL
+   * @param file 文件或Blob对象
+   * @returns string
+   */
+  static createObjectURL(file: File | Blob): string {
+    return URL.createObjectURL(file);
+  }
+
+  /**
+   * 从Base64创建Blob
+   * @param base64 Base64字符串
+   * @param mimeType MIME类型
+   * @returns Blob
+   */
+  static base64ToBlob(base64: string, mimeType: string = 'application/octet-stream'): Blob {
+    const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+
+  /**
+   * 下载Blob为文件
+   * @param blob Blob对象
+   * @param filename 文件名
+   */
+  static downloadBlob(blob: Blob, filename: string): void {
+    const url = this.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * 清理文件名，移除非法字符
+   * @param filename 原始文件名
+   * @returns 清理后的文件名
+   */
+  static sanitizeFileName(filename: string): string {
+    return this.sanitizeFilename(filename);
+  }
+
+  /**
    * 清理文件名，移除非法字符
    * @param filename 原始文件名
    * @returns 清理后的文件名
@@ -158,7 +287,7 @@ export class FileUtils {
    * @returns 格式化的大小字符串
    */
   static formatFileSize(bytes: number, precision: number = 2): string {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) {return '0 B';}
     
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     const k = 1024;

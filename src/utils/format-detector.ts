@@ -180,7 +180,7 @@ export class FormatDetector {
    */
   static validateExtension(filename: string, detectedFormat: string): boolean {
     const ext = filename.split('.').pop()?.toLowerCase();
-    if (!ext) return false;
+    if (!ext) {return false;}
 
     const extensionMap: Record<string, string[]> = {
       'zip': ['zip', 'jar', 'war', 'ear'],

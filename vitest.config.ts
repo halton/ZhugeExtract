@@ -33,10 +33,18 @@ export default defineConfig({
     testTimeout: 10000, // 10秒
     hookTimeout: 10000, // 10秒
     
-    // 并发设置
+    // 并发设置 - 减少内存使用
     threads: true,
-    maxThreads: 4,
+    maxThreads: 2,
     minThreads: 1,
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        maxThreads: 2,
+        minThreads: 1,
+        isolate: false
+      }
+    },
     
     // 覆盖率配置
     coverage: {
