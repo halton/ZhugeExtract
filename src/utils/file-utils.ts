@@ -205,17 +205,17 @@ export class FileUtils {
     // 移除首尾空格和点
     clean = clean.trim().replace(/^\.+|\.+$/g, '');
     
+    // 如果只包含非法字符，返回默认名称
+    if (!clean || clean.replace(/_/g, '').length === 0) {
+      return 'untitled';
+    }
+    
     // 限制长度
     if (clean.length > this.MAX_FILENAME_LENGTH) {
       const ext = this.getFileExtension(filename);
       const maxBaseName = this.MAX_FILENAME_LENGTH - ext.length - 1;
       const baseName = this.getBaseName(clean).substring(0, maxBaseName);
       clean = ext ? `${baseName}.${ext}` : baseName;
-    }
-    
-    // 确保不为空
-    if (!clean) {
-      clean = 'unnamed_file';
     }
     
     return clean;
@@ -542,12 +542,23 @@ export class FileUtils {
    * @returns 拼接后的路径
    */
   static joinPath(...paths: string[]): string {
-    return paths
-      .filter(path => path && path.length > 0)
+    const filteredPaths = paths.filter(path => path && path.length > 0);
+    if (filteredPaths.length === 0) {
+      return '';
+    }
+    
+    const joined = filteredPaths
       .map(path => path.replace(/[\/\\]+/g, '/'))
       .join('/')
-      .replace(/\/+/g, '/')
-      .replace(/\/$/, '') || '/';
+      .replace(/\/+/g, '/');
+    
+    // 保留末尾斜杠如果最后一个路径以斜杠结尾
+    const lastPath = paths[paths.length - 1];
+    if (lastPath && lastPath.endsWith('/') && !joined.endsWith('/')) {
+      return `${joined  }/`;
+    }
+    
+    return joined;
   }
 
   /**
@@ -555,7 +566,7 @@ export class FileUtils {
    * @param path 路径字符串
    * @returns 解析后的路径信息
    */
-  static parsePath(path: string): { dir: string; name: string; ext: string; base: string } {
+  static parsePath(path: string): { dir: string; name: string; ext: string; base?: string } {
     const normalizedPath = path.replace(/[\\]/g, '/');
     const lastSlash = normalizedPath.lastIndexOf('/');
     
@@ -563,8 +574,19 @@ export class FileUtils {
     const fullName = lastSlash >= 0 ? normalizedPath.substring(lastSlash + 1) : normalizedPath;
     
     const lastDot = fullName.lastIndexOf('.');
-    const name = lastDot > 0 ? fullName.substring(0, lastDot) : fullName;
-    const ext = lastDot > 0 ? fullName.substring(lastDot + 1) : '';
+    
+    // 如果文件没有扩展名，name就是整个文件名
+    if (lastDot <= 0) {
+      return {
+        dir,
+        name: fullName,
+        ext: '',
+        base: fullName
+      };
+    }
+    
+    const name = fullName.substring(0, lastDot);
+    const ext = fullName.substring(lastDot + 1);
     
     return {
       dir,

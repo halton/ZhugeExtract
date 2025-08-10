@@ -202,23 +202,31 @@ export class FormatDetector {
    * @returns RAR版本信息
    */
   static detectRarVersion(bytes: Uint8Array): string {
-    if (bytes.length < 8) {
+    if (bytes.length < 7) {
       return 'unknown';
     }
 
-    // RAR v1.5+
-    if (bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && 
-        bytes[4] === 0x1A && bytes[5] === 0x07 && bytes[6] === 0x00) {
-      return 'v1.5+';
+    // 基础RAR签名检查
+    if (!(bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && 
+          bytes[4] === 0x1A && bytes[5] === 0x07)) {
+      return 'unknown';
+    }
+
+    if (bytes.length < 8) {
+      return '4.x'; // 默认返回4.x版本
     }
 
     // RAR v5.0+
-    if (bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && 
-        bytes[4] === 0x1A && bytes[5] === 0x07 && bytes[6] === 0x01 && bytes[7] === 0x00) {
-      return 'v5.0+';
+    if (bytes[6] === 0x01 && bytes[7] === 0x00) {
+      return '5.x';
     }
 
-    return 'unknown';
+    // RAR v4.x及更早版本
+    if (bytes[6] === 0x00) {
+      return '4.x';
+    }
+
+    return '4.x';
   }
 
   /**
@@ -231,17 +239,17 @@ export class FormatDetector {
       return 'unknown';
     }
 
-    // 标准ZIP文件
+    // 标准ZIP文件 - local file header
     if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) {
-      return 'standard';
+      return 'local_file';
     }
 
-    // 空ZIP文件
+    // 空ZIP文件 - end of central directory
     if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x05 && bytes[3] === 0x06) {
       return 'empty';
     }
 
-    // 分卷ZIP文件
+    // 分卷ZIP文件 - data descriptor
     if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x07 && bytes[3] === 0x08) {
       return 'spanned';
     }

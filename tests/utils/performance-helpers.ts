@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+// import { vi } from 'vitest';
 
 /**
  * 性能测试辅助工具

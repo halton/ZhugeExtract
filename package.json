@@ -30,7 +30,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "cross-env NODE_OPTIONS='--max-old-space-size=8192 --no-compilation-cache' vitest run --reporter=basic --run --no-coverage",
+    "test:run": "cross-env NODE_OPTIONS='--max-old-space-size=8192' vitest run --reporter=basic --run --no-coverage",
     "test:coverage": "vitest run --coverage",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",

@@ -6,12 +6,8 @@ import { join } from 'path';
  * 基准测试运行器
  * 用于执行性能基准测试并生成报告
  */
-export class BenchmarkRunner {
-  private results: BenchmarkResult[] = [];
-  private startTime: number = 0;
-
-  // 基准测试结果接口
-  interface BenchmarkResult {
+// 基准测试结果接口
+interface BenchmarkResult {
     name: string;
     iterations: number;
     totalTime: number;
@@ -28,6 +24,10 @@ export class BenchmarkRunner {
     };
     metadata?: Record<string, any>;
   }
+
+export class BenchmarkRunner {
+  private results: BenchmarkResult[] = [];
+  private startTime: number = 0;
 
   // 运行基准测试
   async runBenchmark(
