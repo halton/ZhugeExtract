@@ -197,6 +197,106 @@ export class FormatDetector {
   }
 
   /**
+   * 检测RAR版本
+   * @param bytes 文件头字节
+   * @returns RAR版本信息
+   */
+  static detectRarVersion(bytes: Uint8Array): string {
+    if (bytes.length < 8) {
+      return 'unknown';
+    }
+
+    // RAR v1.5+
+    if (bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && 
+        bytes[4] === 0x1A && bytes[5] === 0x07 && bytes[6] === 0x00) {
+      return 'v1.5+';
+    }
+
+    // RAR v5.0+
+    if (bytes[0] === 0x52 && bytes[1] === 0x61 && bytes[2] === 0x72 && bytes[3] === 0x21 && 
+        bytes[4] === 0x1A && bytes[5] === 0x07 && bytes[6] === 0x01 && bytes[7] === 0x00) {
+      return 'v5.0+';
+    }
+
+    return 'unknown';
+  }
+
+  /**
+   * 获取ZIP类型特征
+   * @param bytes 文件头字节
+   * @returns ZIP类型
+   */
+  static getZipType(bytes: Uint8Array): string {
+    if (bytes.length < 4) {
+      return 'unknown';
+    }
+
+    // 标准ZIP文件
+    if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) {
+      return 'standard';
+    }
+
+    // 空ZIP文件
+    if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x05 && bytes[3] === 0x06) {
+      return 'empty';
+    }
+
+    // 分卷ZIP文件
+    if (bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x07 && bytes[3] === 0x08) {
+      return 'spanned';
+    }
+
+    return 'unknown';
+  }
+
+  /**
+   * 从文件扩展名获取MIME类型
+   * @param filename 文件名
+   * @returns MIME类型
+   */
+  static getMimeType(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (!ext) {
+      return 'application/octet-stream';
+    }
+
+    const mimeMap: Record<string, string> = {
+      // 压缩文件
+      'zip': 'application/zip',
+      'rar': 'application/x-rar-compressed',
+      '7z': 'application/x-7z-compressed',
+      'tar': 'application/x-tar',
+      'gz': 'application/gzip',
+      'bz2': 'application/x-bzip2',
+      'xz': 'application/x-xz',
+      
+      // 文本文件
+      'txt': 'text/plain',
+      'json': 'application/json',
+      'xml': 'application/xml',
+      'html': 'text/html',
+      'css': 'text/css',
+      'js': 'application/javascript',
+      
+      // 图片文件
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'webp': 'image/webp',
+      'svg': 'image/svg+xml',
+      
+      // 音视频文件
+      'mp4': 'video/mp4',
+      'mp3': 'audio/mpeg',
+      'wav': 'audio/wav',
+      'avi': 'video/x-msvideo'
+    };
+
+    return mimeMap[ext] || 'application/octet-stream';
+  }
+
+  /**
    * 高级格式检测，包含更多检查
    * @param file 文件对象
    * @returns Promise<{format: string, confidence: number, info: string}>

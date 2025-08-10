@@ -533,4 +533,103 @@ export class FileUtils {
       return false;
     }
   }
+
+  // === 路径操作函数 ===
+
+  /**
+   * 拼接路径
+   * @param paths 路径片段
+   * @returns 拼接后的路径
+   */
+  static joinPath(...paths: string[]): string {
+    return paths
+      .filter(path => path && path.length > 0)
+      .map(path => path.replace(/[\/\\]+/g, '/'))
+      .join('/')
+      .replace(/\/+/g, '/')
+      .replace(/\/$/, '') || '/';
+  }
+
+  /**
+   * 解析路径
+   * @param path 路径字符串
+   * @returns 解析后的路径信息
+   */
+  static parsePath(path: string): { dir: string; name: string; ext: string; base: string } {
+    const normalizedPath = path.replace(/[\\]/g, '/');
+    const lastSlash = normalizedPath.lastIndexOf('/');
+    
+    const dir = lastSlash > 0 ? normalizedPath.substring(0, lastSlash) : '';
+    const fullName = lastSlash >= 0 ? normalizedPath.substring(lastSlash + 1) : normalizedPath;
+    
+    const lastDot = fullName.lastIndexOf('.');
+    const name = lastDot > 0 ? fullName.substring(0, lastDot) : fullName;
+    const ext = lastDot > 0 ? fullName.substring(lastDot + 1) : '';
+    
+    return {
+      dir,
+      name,
+      ext,
+      base: fullName
+    };
+  }
+
+  // === 文件类型检测函数 ===
+
+  /**
+   * 检测是否为文本文件
+   * @param filename 文件名
+   * @returns boolean
+   */
+  static isTextFile(filename: string): boolean {
+    const textExtensions = [
+      'txt', 'md', 'json', 'xml', 'html', 'css', 'js', 'ts', 'jsx', 'tsx',
+      'py', 'java', 'cpp', 'c', 'h', 'cs', 'php', 'rb', 'go', 'rs', 'sh',
+      'yml', 'yaml', 'toml', 'ini', 'cfg', 'conf', 'log', 'sql', 'csv'
+    ];
+    const ext = this.getFileExtension(filename);
+    return textExtensions.includes(ext);
+  }
+
+  /**
+   * 检测是否为图片文件
+   * @param filename 文件名
+   * @returns boolean
+   */
+  static isImageFile(filename: string): boolean {
+    const imageExtensions = [
+      'jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'ico',
+      'tiff', 'tif', 'psd', 'raw', 'heic', 'heif'
+    ];
+    const ext = this.getFileExtension(filename);
+    return imageExtensions.includes(ext);
+  }
+
+  /**
+   * 检测是否为视频文件
+   * @param filename 文件名
+   * @returns boolean
+   */
+  static isVideoFile(filename: string): boolean {
+    const videoExtensions = [
+      'mp4', 'avi', 'mkv', 'mov', 'wmv', 'flv', 'webm', 'm4v',
+      '3gp', 'ogv', 'ts', 'm2ts', 'mts', 'vob', 'rm', 'rmvb'
+    ];
+    const ext = this.getFileExtension(filename);
+    return videoExtensions.includes(ext);
+  }
+
+  /**
+   * 检测是否为音频文件
+   * @param filename 文件名
+   * @returns boolean
+   */
+  static isAudioFile(filename: string): boolean {
+    const audioExtensions = [
+      'mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a', 'opus',
+      'ape', 'ac3', 'dts', 'amr', 'au', 'ra', 'aiff'
+    ];
+    const ext = this.getFileExtension(filename);
+    return audioExtensions.includes(ext);
+  }
 }

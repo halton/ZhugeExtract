@@ -15,6 +15,7 @@ export interface MemoryAllocation {
   size: number;
   timestamp: number;
   description?: string;
+  priority?: string;
 }
 
 export class MemoryManager {
@@ -38,10 +39,11 @@ export class MemoryManager {
   /**
    * 分配内存块
    * @param size 内存大小（字节）
+   * @param priority 优先级
    * @param description 内存用途描述
    * @returns 分配ID
    */
-  async allocate(size: number, description?: string): Promise<string> {
+  async allocate(size: number, priority?: string, description?: string): Promise<string> {
     const id = this.generateId();
     
     // 检查内存限制
@@ -60,7 +62,8 @@ export class MemoryManager {
       id,
       size,
       timestamp: Date.now(),
-      description
+      description,
+      priority
     };
 
     this.allocations.set(id, allocation);
@@ -305,5 +308,70 @@ export class MemoryManager {
       largestAllocation: this.formatBytes(largest),
       oldestAllocation: oldest
     };
+  }
+
+  /**
+   * 获取最大内存限制
+   * @returns 最大内存限制
+   */
+  getMaxMemory(): number {
+    return this.memoryLimit;
+  }
+
+  /**
+   * 获取内存使用统计
+   * @returns 统计信息
+   */
+  getUsageStats(): {
+    used: number;
+    total: number;
+    free: number;
+    usage: number;
+  } {
+    const used = this.getCurrentUsage();
+    const total = this.memoryLimit;
+    return {
+      used,
+      total,
+      free: total - used,
+      usage: used / total
+    };
+  }
+
+  /**
+   * 更新访问时间（用于LRU）
+   * @param id 分配ID
+   */
+  updateAccess(id: string): void {
+    const allocation = this.allocations.get(id);
+    if (allocation) {
+      allocation.timestamp = Date.now();
+    }
+  }
+
+  /**
+   * 批量释放内存
+   * @param ids 分配ID数组
+   */
+  freeMultiple(ids: string[]): void {
+    for (const id of ids) {
+      this.free(id);
+    }
+  }
+
+  /**
+   * 事件监听器（简化版EventEmitter）
+   * @param event 事件名
+   * @param callback 回调函数
+   */
+  on(event: string, callback: (...args: any[]) => void): void {
+    // 简化的事件系统
+    if (event === 'allocate') {
+      (this as any)._allocateCallback = callback;
+    } else if (event === 'free') {
+      (this as any)._freeCallback = callback;
+    } else if (event === 'gc') {
+      (this as any)._gcCallback = callback;
+    }
   }
 }
